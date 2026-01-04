@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMR - Correction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.379.0/dist/lucide-react.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        .stat-card {
+            @apply bg-white p-6 rounded-lg shadow-sm border border-gray-200;
+        }
+        .stat-card-title {
+            @apply text-sm font-medium text-gray-500;
+        }
+        .stat-card-value {
+            @apply text-3xl font-bold text-gray-900;
+        }
+        #drop-zone {
+            border: 2px dashed #cbd5e1;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        #drop-zone.drag-over {
+            background-color: #e0f2fe;
+            border-color: #0284c7;
+        }
+        .table-header {
+            @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+        }
+        .table-cell {
+            @apply px-4 py-4 whitespace-nowrap text-sm;
+        }
+        .modal-overlay {
+            @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+        }
+        .modal-content {
+            @apply bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl;
+        }
+    </style>
+</head>
+<body class="flex h-screen">
+
+    <!-- Sidebar -->
+    <aside class="sidebar bg-blue-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0">
+        <a href="#" class="text-white flex items-center space-x-2 px-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><circle cx="10" cy="13" r="1"></circle><path d="M12 18h-2"></path><circle cx="10" cy="17" r="1"></circle><circle cx="14" cy="13" r="1"></circle><path d="M16 18h-2"></path><circle cx="14" cy="17" r="1"></circle></svg>
+            <span class="text-2xl font-extrabold"> OMR Correction </span>
+        </a>
+
+        <nav>
+            <a href="#" class="flex items-center space-x-3 bg-blue-900 rounded-md py-3 px-4 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 hover:bg-blue-700 rounded-md py-3 px-4 text-blue-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <span>History</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 hover:bg-blue-700 rounded-md py-3 px-4 text-blue-200">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+             <button id="menu-btn" class="text-gray-600 md:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
+            <h1 class="text-2xl font-bold text-gray-800">Evaluation Dashboard</h1>
+            <div>
+                 <span class="font-semibold">Evaluator Admin</span>
+            </div>
+        </header>
+        
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6 md:p-8">
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="stat-card">
+                    <p class="stat-card-title">Sheets Processed</p>
+                    <p id="sheets-processed" class="stat-card-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-card-title">Avg. Score</p>
+                    <p id="avg-score" class="stat-card-value">0%</p>
+                </div>
+                 <div class="stat-card">
+                    <p class="stat-card-title">Avg. Processing Time</p>
+                    <p id="avg-time" class="stat-card-value">0s</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-card-title">Flagged for Review</p>
+                    <p id="flagged-review" class="stat-card-value">0</p>
+                </div>
+            </div>
+
+            <!-- Upload Zone -->
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-sm border border-gray-200 mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Upload OMR Sheets</h2>
+                <div id="drop-zone" class="flex flex-col items-center justify-center p-10 rounded-lg text-center cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    <input type="file" id="file-input" class="hidden" multiple accept="image/png, image/jpeg, image/gif">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload-cloud text-gray-400 mb-4"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+                    <p class="text-gray-600">Drag & drop files here, or <span class="text-blue-600 font-semibold">browse</span></p>
+                    <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 10MB</p>
+                </div>
+                 <div id="progress-container" class="mt-4 space-y-2"></div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                 <h2 class="text-xl font-bold text-gray-800 p-6">Evaluation Results</h2>
+                 <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="table-header">Sheet ID</th>
+                                <th class="table-header">Subject 1</th>
+                                <th class="table-header">Subject 2</th>
+                                <th class="table-header">Subject 3</th>
+                                <th class="table-header">Subject 4</th>
+                                <th class="table-header">Subject 5</th>
+                                <th class="table-header">Total Score</th>
+                                <th class="table-header">Status</th>
+                                <th class="table-header">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody" class="bg-white divide-y divide-gray-200">
+                            <tr id="placeholder-row">
+                                <td colspan="9" class="text-center py-10 text-gray-500">
+                                    Upload OMR sheets to see results here.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                 </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="review-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                 <h3 class="text-xl font-bold">Review OMR Sheet: <span id="modal-sheet-id"></span></h3>
+                 <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-semibold mb-2">Original Scan</h4>
+                    <img id="original-image" src="https://placehold.co/600x800/eee/ccc?text=Original+Scan" alt="Original OMR Sheet" class="w-full rounded-md border">
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-2">Processed Result with Overlay</h4>
+                    <img id="processed-image" src="https://placehold.co/600x800/e0f2fe/0284c7?text=Processed+Result" alt="Processed OMR Sheet" class="w-full rounded-md border">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const progressContainer = document.getElementById('progress-container');
+        const resultsTbody = document.getElementById('results-tbody');
+        const placeholderRow = document.getElementById('placeholder-row');
+        
+        const sheetsProcessedEl = document.getElementById('sheets-processed');
+        const avgScoreEl = document.getElementById('avg-score');
+        const avgTimeEl = document.getElementById('avg-time');
+        const flaggedReviewEl = document.getElementById('flagged-review');
+        
+        const reviewModal = document.getElementById('review-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalSheetId = document.getElementById('modal-sheet-id');
+
+        let processedCount = 0;
+        let totalScore = 0;
+        let totalTime = 0;
+        let flaggedCount = 0;
+
+        // Sidebar toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.querySelector('.sidebar');
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // File Upload Logic
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                handleFiles(files);
+            }
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFiles(e.target.files);
+            }
+        });
+
+        function handleFiles(files) {
+            if (placeholderRow) {
+                const parent = placeholderRow.parentElement;
+                if (parent) parent.removeChild(placeholderRow);
+            }
+            
+            [...files].forEach(file => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    simulateProcessing(file);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function simulateProcessing(file) {
+            const fileId = `file-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+            const progressHTML = `
+                <div id="${fileId}" class="w-full bg-gray-200 rounded-full">
+                    <div class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style="width: 10%"> 10% </div>
+                </div>`;
+            progressContainer.innerHTML += progressHTML;
+            
+            // Simulate processing progress
+            const progressBar = document.querySelector(`#${fileId} > div`);
+            let width = 10;
+            const interval = setInterval(() => {
+                width += Math.floor(Math.random() * 10) + 10;
+                if (width >= 100) {
+                    width = 100;
+                    clearInterval(interval);
+                    const progressElement = document.getElementById(fileId);
+                    if(progressElement) progressElement.remove();
+                    addResultToTable(file);
+                }
+                progressBar.style.width = width + '%';
+                progressBar.textContent = width + '%';
+            }, 200);
+        }
+
+        function addResultToTable(file) {
+            const sheetId = file.name.split('.')[0].substring(0, 15);
+            const scores = Array(5).fill(0).map(() => Math.floor(Math.random() * 18) + 3); // Score between 3 and 20
+            const currentTotal = scores.reduce((a, b) => a + b, 0);
+            const isFlagged = Math.random() < 0.1; // 10% chance of being flagged
+            
+            const newRow = document.createElement('tr');
+            newRow.className = isFlagged ? 'bg-yellow-50' : '';
+            newRow.innerHTML = `
+                <td class="table-cell font-medium text-gray-900">${sheetId}</td>
+                ${scores.map(s => `<td class="table-cell text-gray-500">${s}</td>`).join('')}
+                <td class="table-cell font-bold ${currentTotal > 75 ? 'text-green-600' : 'text-red-600'}">${currentTotal}</td>
+                <td class="table-cell">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isFlagged ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                        ${isFlagged ? 'Flagged' : 'Success'}
+                    </span>
+                </td>
+                <td class="table-cell">
+                    <button data-sheet-id="${sheetId}" class="view-btn text-blue-600 hover:text-blue-900 font-semibold">View</button>
+                </td>
+            `;
+            resultsTbody.prepend(newRow);
+
+            // Update stats
+            processedCount++;
+            totalScore += currentTotal;
+            totalTime += (Math.random() * 2) + 1; // 1-3 seconds processing time
+            if (isFlagged) flaggedCount++;
+
+            sheetsProcessedEl.textContent = processedCount;
+            avgScoreEl.textContent = `${(totalScore / processedCount).toFixed(1)}%`;
+            avgTimeEl.textContent = `${(totalTime / processedCount).toFixed(1)}s`;
+            flaggedReviewEl.textContent = flaggedCount;
+        }
+
+        // Modal logic
+        resultsTbody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('view-btn')) {
+                modalSheetId.textContent = e.target.dataset.sheetId;
+                reviewModal.classList.remove('hidden');
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            reviewModal.classList.add('hidden');
+        });
+        
+        reviewModal.addEventListener('click', (e) => {
+            if (e.target === reviewModal) {
+                 reviewModal.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
